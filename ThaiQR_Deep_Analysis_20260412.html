@@ -354,10 +354,9 @@
 <script>
 function toggleTheme(){
   const h=document.documentElement,i=document.getElementById('themeIcon'),l=document.getElementById('themeLabel');
-  if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');i.textContent='🌙';l.textContent='Dark';localStorage.setItem('theme','light');}
-  else{h.setAttribute('data-theme','dark');i.textContent='☀️';l.textContent='Light';localStorage.setItem('theme','dark');}
+  if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');i.textContent='🌙';l.textContent='Dark';}
+  else{h.setAttribute('data-theme','dark');i.textContent='☀️';l.textContent='Light';}
 }
-(function(){const s=localStorage.getItem('theme');if(s==='light'){document.documentElement.setAttribute('data-theme','light');document.getElementById('themeIcon').textContent='🌙';document.getElementById('themeLabel').textContent='Dark';}})();
 </script>
 <script src="bg-anim.js"></script>
 </body>
