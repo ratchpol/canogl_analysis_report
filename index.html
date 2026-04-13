@@ -1,588 +1,178 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>รายงานวิเคราะห์ระบบชำระเงิน - 12 เม.ย. 2569</title>
+<title>Payment Gateway — Log Analysis Reports</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; line-height: 1.6; -webkit-text-size-adjust: 100%; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-  .header { background: linear-gradient(135deg, #1a237e, #283593); color: #fff; padding: 40px 30px; border-radius: 12px; margin-bottom: 24px; }
-  .header h1 { font-size: 26px; margin-bottom: 8px; }
-  .header p { opacity: 0.85; font-size: 14px; }
-  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .card .label { font-size: 13px; color: #777; margin-bottom: 4px; }
-  .card .value { font-size: 28px; font-weight: 700; }
-  .card .sub { font-size: 12px; color: #999; margin-top: 4px; }
-  .card.green .value { color: #2e7d32; }
-  .card.blue .value { color: #1565c0; }
-  .card.orange .value { color: #e65100; }
-  .card.red .value { color: #c62828; }
-  .card.purple .value { color: #6a1b9a; }
-  .section { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .section h2 { font-size: 18px; color: #1a237e; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e8eaf6; }
-  .section h3 { font-size: 15px; color: #37474f; margin: 16px 0 10px 0; }
-  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
-  th { background: #e8eaf6; color: #1a237e; padding: 10px 12px; text-align: left; font-weight: 600; white-space: nowrap; position: sticky; top: 0; }
-  td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
-  tr:hover td { background: #f5f5f5; }
-  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .badge-ok { background: #e8f5e9; color: #2e7d32; }
-  .badge-warn { background: #fff3e0; color: #e65100; }
-  .badge-err { background: #ffebee; color: #c62828; }
-  .badge-info { background: #e3f2fd; color: #1565c0; }
-  .bar-container { display: flex; align-items: center; gap: 8px; }
-  .bar { height: 18px; border-radius: 4px; min-width: 2px; }
-  .bar-green { background: #66bb6a; }
-  .bar-blue { background: #42a5f5; }
-  .bar-orange { background: #ffa726; }
-  .bar-red { background: #ef5350; }
-  .flow-box { background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 10px 0; font-size: 13px; font-family: monospace; word-break: break-word; overflow-wrap: break-word; }
-  .flow-box .arrow { color: #1565c0; font-weight: bold; }
-  .highlight { background: #fff9c4; padding: 2px 6px; border-radius: 4px; }
-  .footer { text-align: center; color: #999; font-size: 12px; padding: 20px; }
-  .severity-critical { border-left: 4px solid #c62828; padding-left: 12px; margin: 12px 0; }
-  .severity-warning { border-left: 4px solid #e65100; padding-left: 12px; margin: 12px 0; }
-  .severity-info { border-left: 4px solid #1565c0; padding-left: 12px; margin: 12px 0; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+:root {
+  --bg:#f0f2f5;--bg2:#fff;--text:#333;--text2:#666;--text3:#999;
+  --primary:#1a237e;--primary2:#3949ab;--primary-light:#e8eaf6;
+  --border:#e0e0e0;--shadow:rgba(0,0,0,0.06);--shadow2:rgba(0,0,0,0.12);
+  --green:#2e7d32;--green-bg:#e8f5e9;--blue:#1565c0;--blue-bg:#e3f2fd;
+  --orange:#e65100;--orange-bg:#fff3e0;--red:#c62828;--red-bg:#ffebee;
+  --header-grad1:#1a237e;--header-grad2:#3949ab;
+  --card-hover:#f8f9ff;
+}
+[data-theme="dark"] {
+  --bg:#121212;--bg2:#1e1e1e;--text:#e0e0e0;--text2:#aaa;--text3:#666;
+  --primary:#90caf9;--primary2:#64b5f6;--primary-light:#1e2a4a;
+  --border:#333;--shadow:rgba(0,0,0,0.3);--shadow2:rgba(0,0,0,0.5);
+  --green:#66bb6a;--green-bg:#1b3a1b;--blue:#64b5f6;--blue-bg:#1a2a3a;
+  --orange:#ffa726;--orange-bg:#3a2a1a;--red:#ef5350;--red-bg:#3a1a1a;
+  --header-grad1:#0d1b3e;--header-grad2:#1a2a5e;
+  --card-hover:#252535;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-text-size-adjust:100%;transition:background .3s,color .3s;}
+.container{max-width:900px;margin:0 auto;padding:20px;}
+.header{background:linear-gradient(135deg,var(--header-grad1),var(--header-grad2));color:#fff;padding:36px 30px 30px;border-radius:14px;margin-bottom:28px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;}
+.header::after{content:'';position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:rgba(255,255,255,0.03);border-radius:50%;}
+.header h1{font-size:24px;margin-bottom:6px;position:relative;z-index:1;}
+.header p{opacity:0.8;font-size:13px;position:relative;z-index:1;}
+.theme-toggle{position:absolute;top:16px;right:20px;z-index:10;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:24px;padding:6px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;backdrop-filter:blur(4px);}
+.theme-toggle:hover{background:rgba(255,255,255,0.25);}
 
-  /* ===== Mobile: <= 480px ===== */
-  @media (max-width: 480px) {
-    .container { padding: 10px; }
-    .header { padding: 24px 16px; border-radius: 8px; margin-bottom: 16px; }
-    .header h1 { font-size: 18px; }
-    .header p { font-size: 12px; }
-    .summary-cards { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .card { padding: 14px; }
-    .card .value { font-size: 22px; }
-    .card .label { font-size: 11px; }
-    .card .sub { font-size: 10px; }
-    .section { padding: 16px 12px; margin-bottom: 14px; border-radius: 8px; }
-    .section h2 { font-size: 16px; margin-bottom: 12px; }
-    .section h3 { font-size: 14px; }
-    table { font-size: 12px; min-width: 400px; }
-    th { padding: 8px 8px; font-size: 12px; }
-    td { padding: 6px 8px; font-size: 12px; }
-    .flow-box { font-size: 11px; padding: 12px; }
-    .severity-critical, .severity-warning, .severity-info { padding-left: 10px; margin: 10px 0; }
-    .severity-critical p, .severity-warning p, .severity-info p { font-size: 13px; }
-    .two-col { grid-template-columns: 1fr; gap: 12px; }
-    .bar { max-width: 120px; }
-  }
+/* Search */
+.search-box{margin-bottom:20px;position:relative;}
+.search-box input{width:100%;padding:12px 16px 12px 42px;border:2px solid var(--border);border-radius:10px;font-size:14px;background:var(--bg2);color:var(--text);transition:border .2s,background .3s;outline:none;}
+.search-box input:focus{border-color:var(--primary);}
+.search-box input::placeholder{color:var(--text3);}
+.search-box .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3);}
 
-  /* ===== Tablet: 481-768px ===== */
-  @media (min-width: 481px) and (max-width: 768px) {
-    .container { padding: 14px; }
-    .header { padding: 30px 20px; }
-    .header h1 { font-size: 22px; }
-    .summary-cards { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-    .card .value { font-size: 24px; }
-    .section { padding: 20px 16px; }
-    .two-col { grid-template-columns: 1fr; }
-    .bar { max-width: 160px; }
-  }
+/* Report cards */
+.report-list{display:flex;flex-direction:column;gap:12px;}
+.report-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--text);transition:all .2s;box-shadow:0 2px 8px var(--shadow);cursor:pointer;}
+.report-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow2);background:var(--card-hover);border-color:var(--primary);}
+.report-card:active{transform:translateY(0);}
+.report-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.icon-blue{background:var(--blue-bg);color:var(--blue);}
+.icon-green{background:var(--green-bg);color:var(--green);}
+.icon-orange{background:var(--orange-bg);color:var(--orange);}
+.icon-red{background:var(--red-bg);color:var(--red);}
+.report-info{flex:1;min-width:0;}
+.report-title{font-size:15px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.report-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.report-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+.meta-tag{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600;white-space:nowrap;}
+.meta-date{background:var(--blue-bg);color:var(--blue);}
+.meta-time{background:var(--green-bg);color:var(--green);}
+.meta-count{background:var(--orange-bg);color:var(--orange);}
+.meta-status{background:var(--red-bg);color:var(--red);}
+.report-arrow{color:var(--text3);font-size:20px;flex-shrink:0;transition:transform .2s;}
+.report-card:hover .report-arrow{transform:translateX(4px);color:var(--primary);}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-state .icon{font-size:48px;margin-bottom:12px;}
+
+/* Footer */
+.footer{text-align:center;color:var(--text3);font-size:12px;padding:24px 20px;margin-top:12px;}
+
+/* Mobile */
+@media(max-width:480px){
+  .container{padding:10px;}
+  .header{padding:20px 16px 18px;border-radius:10px;margin-bottom:18px;}
+  .header h1{font-size:17px;}
+  .header p{font-size:11px;}
+  .theme-toggle{top:12px;right:12px;padding:5px 12px;font-size:12px;}
+  .search-box input{padding:10px 14px 10px 38px;font-size:13px;}
+  .report-card{padding:14px 14px;gap:12px;}
+  .report-icon{width:40px;height:40px;font-size:18px;border-radius:10px;}
+  .report-title{font-size:13px;}
+  .report-desc{font-size:11px;}
+  .meta-tag{font-size:10px;}
+}
 </style>
 </head>
 <body>
 <div class="container">
 
 <div class="header">
-  <h1>📊 รายงานวิเคราะห์ระบบชำระเงิน (Payment Gateway)</h1>
-  <p>วันที่: 12 เมษายน 2569 | ช่วงเวลา: 20:00 - 23:00 น. (3 ชั่วโมง) | จำนวนไฟล์ Log: 8,447 ไฟล์</p>
-  <p>จัดทำเมื่อ: 13 เมษายน 2569</p>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+    <span id="themeLabel">Dark</span>
+  </button>
+  <h1>📊 Payment Gateway — Log Analysis</h1>
+  <p>ศูนย์รวมรายงานวิเคราะห์ระบบชำระเงิน</p>
 </div>
 
-<!-- ==================== EXECUTIVE SUMMARY ==================== -->
-<div class="summary-cards">
-  <div class="card blue">
-    <div class="label">ธุรกรรมทั้งหมด (Bank Notify)</div>
-    <div class="value">7,200</div>
-    <div class="sub">Thai QR / TTB</div>
-  </div>
-  <div class="card green">
-    <div class="label">ความเร็วประมวลผลเฉลี่ย</div>
-    <div class="value">0.02 วิ</div>
-    <div class="sub">Notify → บันทึก DB</div>
-  </div>
-  <div class="card purple">
-    <div class="label">QR Code ที่สร้าง</div>
-    <div class="value">8,228</div>
-    <div class="sub">ทุก Provider รวมกัน</div>
-  </div>
-  <div class="card orange">
-    <div class="label">Peak TPS</div>
-    <div class="value">6 tx/s</div>
-    <div class="sub">สูงสุดต่อวินาที</div>
-  </div>
-  <div class="card red">
-    <div class="label">Errors ทั้งหมด</div>
-    <div class="value">3,863</div>
-    <div class="sub">ทุกประเภทรวมกัน</div>
-  </div>
+<div class="search-box">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="searchInput" placeholder="ค้นหารายงาน... (วันที่, ช่วงเวลา, คำอธิบาย)" oninput="filterReports()">
 </div>
 
-<!-- ==================== SECTION 1: OVERVIEW ==================== -->
-<div class="section">
-  <h2>1. ภาพรวมระบบ</h2>
-  <p>ระบบ Payment Gateway รองรับการชำระเงินผ่าน QR Code หลายช่องทาง โดยเชื่อมต่อกับธนาคารและ e-Wallet ต่างๆ ในประเทศไทย</p>
+<div class="report-list" id="reportList">
+  <!-- ====== REPORTS — เพิ่มรายงานใหม่ด้านล่างนี้ ====== -->
 
-  <h3>ช่องทางชำระเงินที่เชื่อมต่อ</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ช่องทาง</th><th>ประเภท</th><th>จำนวนไฟล์ Log</th><th>สถานะ</th></tr>
-    <tr><td>🏦 Thai QR / TTB (ทหารไทยธนชาต)</td><td>QR Payment + Bank Notify</td><td>หลายพันไฟล์</td><td><span class="badge badge-ok">ทำงานปกติ</span></td></tr>
-    <tr><td>🔵 Alipay+</td><td>QR / Merchant Scan / CSB</td><td>1,249</td><td><span class="badge badge-ok">ทำงานปกติ</span></td></tr>
-    <tr><td>🟠 TrueMoney Wallet</td><td>Merchant Scan / Order Query</td><td>596</td><td><span class="badge badge-warn">มี Error บางส่วน</span></td></tr>
-    <tr><td>🟣 CIL (Payment Aggregator)</td><td>QR / BSC / Merchant Scan</td><td>954</td><td><span class="badge badge-warn">มี Error บางส่วน</span></td></tr>
-    <tr><td>🔷 BBL (กรุงเทพ)</td><td>QR Payment</td><td>95</td><td><span class="badge badge-ok">ทำงานปกติ</span></td></tr>
-    <tr><td>🟧 ShopeePay</td><td>QR / Merchant Scan</td><td>62</td><td><span class="badge badge-warn">มี Error บางส่วน</span></td></tr>
-    <tr><td>🟢 LINE Pay</td><td>QR Code v3</td><td>12</td><td><span class="badge badge-ok">ทำงานปกติ</span></td></tr>
-  </table></div>
-
-  <h3>Flow การทำงานหลักของ Thai QR (TTB)</h3>
-  <div class="flow-box">
-    <strong>Flow A — สร้าง QR และ Polling สถานะ:</strong><br>
-    สร้าง QR Code <span class="arrow">→</span> เพิ่มเข้าระบบ <span class="arrow">→</span> Poll ถามสถานะจาก TTB (ทุกๆ ไม่กี่วินาที) <span class="arrow">→</span> TTB ตอบกลับ<br><br>
-    <strong>Flow B — ธนาคารแจ้งผลชำระเงิน (Push):</strong><br>
-    ธนาคาร TTB ส่ง Notify <span class="arrow">→</span> บันทึกลง Database <span class="arrow">→</span> แจ้ง Merchant <span class="arrow">→</span> ส่ง LINE แจ้งลูกค้า
-  </div>
-</div>
-
-<!-- ==================== SECTION 2: TRANSACTION VOLUME ==================== -->
-<div class="section">
-  <h2>2. ปริมาณธุรกรรม</h2>
-
-  <h3>2.1 สรุปปริมาณตามประเภท</h3>
-  <div class="table-wrap"><table>
-    <tr><th>รายการ</th><th>จำนวน</th><th>หมายเหตุ</th></tr>
-    <tr><td>Bank Notify จาก TTB</td><td><strong>7,200</strong></td><td>ธนาคารแจ้งผลชำระเงินเข้ามา</td></tr>
-    <tr><td>บันทึกลง DB สำเร็จ</td><td><strong>6,770</strong></td><td>savepaymenttransaction</td></tr>
-    <tr><td>สร้าง QR Code</td><td><strong>8,228</strong></td><td>Thai QR Code ทั้งหมด</td></tr>
-    <tr><td>Order Query Polling</td><td><strong>36,365</strong></td><td>ระบบ poll ถามสถานะจาก TTB</td></tr>
-    <tr><td>Order Query สำเร็จ</td><td><strong>162</strong></td><td>พบรายการที่จ่ายแล้ว (1.6%)</td></tr>
-    <tr><td>Order Query ไม่พบ</td><td><strong>9,856</strong></td><td>ยังไม่จ่าย / รอชำระ (98.4%)</td></tr>
-    <tr><td>Alipay+ Notify (CSB)</td><td><strong>7,998</strong></td><td>Alipay+ แจ้งผลชำระ</td></tr>
-    <tr><td>Alipay+ Merchant Scan</td><td><strong>822</strong></td><td>ร้านค้าสแกน</td></tr>
-    <tr><td>CIL BSC Request</td><td><strong>572</strong></td><td>CIL payment requests</td></tr>
-    <tr><td>TrueMoney Merchant Scan</td><td><strong>300</strong></td><td>TrueMoney requests</td></tr>
-    <tr><td>TrueMoney Order Query</td><td><strong>326</strong></td><td>TrueMoney query</td></tr>
-    <tr><td>BBL QR Request</td><td><strong>23</strong></td><td>กรุงเทพ QR</td></tr>
-    <tr><td>ShopeePay Merchant Scan</td><td><strong>8</strong></td><td>ShopeePay scan</td></tr>
-    <tr><td>LINE Pay QR</td><td><strong>3</strong></td><td>LINE Pay requests</td></tr>
-    <tr><td>แจ้ง Merchant สำเร็จ</td><td><strong>781</strong></td><td>POST notify to merchant</td></tr>
-    <tr><td>แจ้ง CIL Merchant</td><td><strong>2,731</strong></td><td>POST CIL notify</td></tr>
-    <tr><td>ส่ง LINE Notify</td><td><strong>6,769</strong></td><td>แจ้งเตือนผ่าน LINE</td></tr>
-    <tr><td>ส่ง LINE Flex Message</td><td><strong>27,206</strong></td><td>ส่งข้อความ Flex ผ่าน LINE</td></tr>
-    <tr><td>Cancel / Refund</td><td><strong>8</strong></td><td>ยกเลิก + คืนเงิน</td></tr>
-  </table></div>
-
-  <h3>2.2 ปริมาณรายชั่วโมง (Thai QR Bank Notify)</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ช่วงเวลา</th><th>จำนวน</th><th>เฉลี่ย TPS</th><th>สัดส่วน</th></tr>
-    <tr>
-      <td>20:00 - 20:59</td><td><strong>3,438</strong></td><td>0.96</td>
-      <td><div class="bar-container"><div class="bar bar-blue" style="width:200px"></div>47.8%</div></td>
-    </tr>
-    <tr>
-      <td>21:00 - 21:59</td><td><strong>2,228</strong></td><td>0.62</td>
-      <td><div class="bar-container"><div class="bar bar-blue" style="width:130px"></div>30.9%</div></td>
-    </tr>
-    <tr>
-      <td>22:00 - 22:59</td><td><strong>1,534</strong></td><td>0.43</td>
-      <td><div class="bar-container"><div class="bar bar-blue" style="width:89px"></div>21.3%</div></td>
-    </tr>
-  </table></div>
-</div>
-
-<!-- ==================== SECTION 3: TPS ==================== -->
-<div class="section">
-  <h2>3. TPS (Transactions Per Second)</h2>
-
-  <div class="two-col">
-    <div>
-      <h3>สถิติ TPS</h3>
-      <div class="table-wrap"><table>
-        <tr><th>ตัวชี้วัด</th><th>ค่า</th></tr>
-        <tr><td>TPS เฉลี่ยรวม</td><td><strong>0.69</strong> tx/sec</td></tr>
-        <tr><td>TPS สูงสุดต่อนาที</td><td><strong>1.28</strong> tx/sec (77 tx/min)</td></tr>
-        <tr><td>TPS สูงสุดต่อวินาที</td><td><strong>6</strong> tx/sec</td></tr>
-        <tr><td>นาทีที่มี traffic</td><td><strong>175</strong> นาที</td></tr>
-      </table></div>
+  <a class="report-card" href="Payment_System_Report_20260412.html"
+     data-search="12 เมษายน 2569 20:00-23:00 payment gateway thai qr ttb alipay truemoney cil bbl shopeepay linepay">
+    <div class="report-icon icon-blue">📄</div>
+    <div class="report-info">
+      <div class="report-title">รายงานวิเคราะห์ระบบชำระเงิน</div>
+      <div class="report-desc">วิเคราะห์ Log ทุก Provider: Thai QR, Alipay+, TrueMoney, CIL, BBL, ShopeePay, LINE Pay — ครอบคลุม Response Time, TPS, Error Analysis พร้อมข้อเสนอแนะ</div>
+      <div class="report-meta">
+        <span class="meta-tag meta-date">📅 12 เม.ย. 2569</span>
+        <span class="meta-tag meta-time">🕐 20:00 - 23:00</span>
+        <span class="meta-tag meta-count">📦 7,200 tx</span>
+        <span class="meta-tag meta-status">🚨 3,863 errors</span>
+      </div>
     </div>
-    <div>
-      <h3>10 นาทีที่มี Traffic สูงสุด</h3>
-      <div class="table-wrap"><table>
-        <tr><th>เวลา</th><th>จำนวน</th><th>TPS</th></tr>
-        <tr><td>20:03</td><td>77</td><td>1.28</td></tr>
-        <tr><td>20:02</td><td>76</td><td>1.27</td></tr>
-        <tr><td>20:05</td><td>71</td><td>1.18</td></tr>
-        <tr><td>20:28</td><td>71</td><td>1.18</td></tr>
-        <tr><td>20:06</td><td>71</td><td>1.18</td></tr>
-        <tr><td>20:12</td><td>69</td><td>1.15</td></tr>
-        <tr><td>20:09</td><td>69</td><td>1.15</td></tr>
-        <tr><td>20:22</td><td>68</td><td>1.13</td></tr>
-        <tr><td>20:08</td><td>67</td><td>1.12</td></tr>
-        <tr><td>20:07</td><td>67</td><td>1.12</td></tr>
-      </table></div>
+    <div class="report-arrow">›</div>
+  </a>
+
+  <!-- ====== ตัวอย่าง: เพิ่มรายงานใหม่ (copy block ด้านล่างแล้วแก้ข้อมูล) ======
+  <a class="report-card" href="Payment_System_Report_XXXXXXXX.html"
+     data-search="วันที่ เวลา keyword ค้นหา">
+    <div class="report-icon icon-green">📄</div>
+    <div class="report-info">
+      <div class="report-title">ชื่อรายงาน</div>
+      <div class="report-desc">คำอธิบายรายงาน</div>
+      <div class="report-meta">
+        <span class="meta-tag meta-date">📅 วันที่</span>
+        <span class="meta-tag meta-time">🕐 เวลา</span>
+        <span class="meta-tag meta-count">📦 จำนวน tx</span>
+        <span class="meta-tag meta-status">🚨 จำนวน errors</span>
+      </div>
     </div>
-  </div>
+    <div class="report-arrow">›</div>
+  </a>
+  ====== -->
 
-  <h3>10 วินาทีที่มี Traffic สูงสุด</h3>
-  <div class="table-wrap"><table>
-    <tr><th>เวลา</th><th>จำนวน tx</th></tr>
-    <tr><td>20:05:26</td><td>6</td></tr>
-    <tr><td>21:09:25</td><td>6</td></tr>
-    <tr><td>20:02:25</td><td>6</td></tr>
-    <tr><td>20:00:32</td><td>6</td></tr>
-    <tr><td>20:05:20</td><td>6</td></tr>
-    <tr><td>20:48:32</td><td>6</td></tr>
-    <tr><td>20:12:48</td><td>5</td></tr>
-    <tr><td>20:26:12</td><td>5</td></tr>
-    <tr><td>22:33:11</td><td>5</td></tr>
-    <tr><td>20:16:32</td><td>5</td></tr>
-  </table></div>
 </div>
 
-<!-- ==================== SECTION 4: RESPONSE TIME ==================== -->
-<div class="section">
-  <h2>4. ความเร็วในการประมวลผล (Response Time)</h2>
-
-  <h3>4.1 Bank Notify → บันทึก DB (ความเร็วภายในระบบ)</h3>
-  <p>วัดจากเวลาที่ธนาคาร TTB ส่ง Notify เข้ามา จนถึงเวลาที่ระบบบันทึกลง Database สำเร็จ</p>
-  <div class="table-wrap"><table>
-    <tr><th>ตัวชี้วัด</th><th>ค่า</th><th>ประเมิน</th></tr>
-    <tr><td>จำนวนที่วิเคราะห์ได้</td><td><strong>6,769</strong> รายการ</td><td></td></tr>
-    <tr><td>เร็วที่สุด (Min)</td><td><strong>0</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-    <tr><td>ช้าที่สุด (Max)</td><td><strong>1</strong> วินาที</td><td><span class="badge badge-ok">ดี</span></td></tr>
-    <tr><td>เฉลี่ย (Average)</td><td><strong>0.02</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-    <tr><td>ค่ากลาง (Median)</td><td><strong>0</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-    <tr><td>P95</td><td><strong>0</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-    <tr><td>P99</td><td><strong>1</strong> วินาที</td><td><span class="badge badge-ok">ดี</span></td></tr>
-  </table></div>
-
-  <h3>การกระจายตัวของเวลาประมวลผล</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ช่วงเวลา</th><th>จำนวน</th><th>สัดส่วน</th><th></th></tr>
-    <tr>
-      <td>0 วินาที (เร็วกว่า 1 วินาที)</td><td>6,647</td><td>98.2%</td>
-      <td><div class="bar-container"><div class="bar bar-green" style="width:300px"></div></div></td>
-    </tr>
-    <tr>
-      <td>1 วินาที</td><td>122</td><td>1.8%</td>
-      <td><div class="bar-container"><div class="bar bar-blue" style="width:5px"></div></div></td>
-    </tr>
-    <tr>
-      <td>2 วินาทีขึ้นไป</td><td>0</td><td>0%</td>
-      <td>-</td>
-    </tr>
-  </table></div>
-
-  <h3>4.2 CHECK → RETURN Order Query (ความเร็ว TTB API)</h3>
-  <p>วัดจากเวลาที่ระบบส่ง query ไปถาม TTB จนถึงเวลาที่ TTB ตอบกลับ</p>
-  <div class="table-wrap"><table>
-    <tr><th>ตัวชี้วัด</th><th>ค่า</th><th>ประเมิน</th></tr>
-    <tr><td>จำนวนตัวอย่าง</td><td><strong>290</strong> คู่</td><td></td></tr>
-    <tr><td>เร็วที่สุด (Min)</td><td><strong>0</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-    <tr><td>ช้าที่สุด (Max)</td><td><strong>9</strong> วินาที</td><td><span class="badge badge-warn">ช้าบางจุด</span></td></tr>
-    <tr><td>เฉลี่ย (Average)</td><td><strong>0.48</strong> วินาที</td><td><span class="badge badge-ok">ดี</span></td></tr>
-    <tr><td>ค่ากลาง (Median)</td><td><strong>0</strong> วินาที</td><td><span class="badge badge-ok">ดีมาก</span></td></tr>
-  </table></div>
-
-  <h3>การกระจายตัวของเวลา TTB API</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ช่วงเวลา</th><th>จำนวน</th><th>สัดส่วน</th><th></th></tr>
-    <tr>
-      <td>0-1 วินาที</td><td>257</td><td>88.6%</td>
-      <td><div class="bar-container"><div class="bar bar-green" style="width:270px"></div></div></td>
-    </tr>
-    <tr>
-      <td>2-3 วินาที</td><td>26</td><td>9.0%</td>
-      <td><div class="bar-container"><div class="bar bar-orange" style="width:27px"></div></div></td>
-    </tr>
-    <tr>
-      <td>4-5 วินาที</td><td>6</td><td>2.1%</td>
-      <td><div class="bar-container"><div class="bar bar-orange" style="width:6px"></div></div></td>
-    </tr>
-    <tr>
-      <td>6-10 วินาที</td><td>1</td><td>0.3%</td>
-      <td><div class="bar-container"><div class="bar bar-red" style="width:2px"></div></div></td>
-    </tr>
-  </table></div>
-</div>
-
-<!-- ==================== SECTION 5: ERROR ANALYSIS ==================== -->
-<div class="section">
-  <h2>5. การวิเคราะห์ปัญหา (Error Analysis)</h2>
-
-  <h3>5.1 สรุปจำนวน Error ทั้งหมด</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ประเภท Error</th><th>จำนวน</th><th>ระดับ</th><th>ผลกระทบ</th></tr>
-    <tr>
-      <td>savepaymenttransaction_ERROR</td><td><strong>998</strong></td>
-      <td><span class="badge badge-err">สำคัญ</span></td>
-      <td>บันทึกธุรกรรมลง DB ไม่สำเร็จ</td>
-    </tr>
-    <tr>
-      <td>ERROR_savepaymenttransaction_TTB</td><td><strong>860</strong></td>
-      <td><span class="badge badge-err">สำคัญ</span></td>
-      <td>บันทึก TTB notify ลง DB ไม่สำเร็จ</td>
-    </tr>
-    <tr>
-      <td>ERROR_CIL_NOTIFY_URL</td><td><strong>836</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>แจ้ง CIL merchant ไม่สำเร็จ</td>
-    </tr>
-    <tr>
-      <td>ERROR_ALIPAYPLUS_NOTIFY_TO_CUSTOMER</td><td><strong>646</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>แจ้งลูกค้า Alipay+ ไม่สำเร็จ</td>
-    </tr>
-    <tr>
-      <td>ERROR_POST_CIL_NOTIFY_URL</td><td><strong>414</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>POST callback ไป CIL merchant ล้มเหลว</td>
-    </tr>
-    <tr>
-      <td>ERROR_TRUEMONEYWALLET_ORDERQUERY</td><td><strong>38</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>TrueMoney API ตอบ 400 Bad Request</td>
-    </tr>
-    <tr>
-      <td>ALIPAYPLUS_NOTIFY_URL_ERROR02</td><td><strong>20</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>ไม่พบ paymentrequestid + NullReference</td>
-    </tr>
-    <tr>
-      <td>TRUEMONEYWALLET_RETURN_ERROR_WEBEXCEPTION</td><td><strong>17</strong></td>
-      <td><span class="badge badge-info">ต่ำ</span></td>
-      <td>Payment code หมดอายุ / เงินไม่พอ</td>
-    </tr>
-    <tr>
-      <td>savefiletransaction_ERROR</td><td><strong>10</strong></td>
-      <td><span class="badge badge-err">สำคัญ</span></td>
-      <td>Schema DB ไม่ตรง (column ไม่มี)</td>
-    </tr>
-    <tr>
-      <td>TOKEN_ERROR</td><td><strong>10</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>Token ไม่ valid สำหรับ order query</td>
-    </tr>
-    <tr>
-      <td>Error_shopeepay_query_RESPONSE</td><td><strong>9</strong></td>
-      <td><span class="badge badge-info">ต่ำ</span></td>
-      <td>ไม่พบ transaction ใน ShopeePay</td>
-    </tr>
-    <tr>
-      <td>ERROR_CIL_MERCHANT_SCAN_RESPONSE_PAYMENT</td><td><strong>5</strong></td>
-      <td><span class="badge badge-warn">ปานกลาง</span></td>
-      <td>NullReferenceException ใน CIL scan</td>
-    </tr>
-    <tr style="background:#f5f5f5; font-weight:bold;">
-      <td>รวมทั้งหมด</td><td><strong>3,863</strong></td>
-      <td></td><td></td>
-    </tr>
-  </table></div>
-
-  <!-- 5.2 Database Errors -->
-  <h3>5.2 ปัญหา Database (ระดับสำคัญ — ต้องแก้ไข)</h3>
-
-  <div class="severity-critical">
-    <strong>🔴 ปัญหาที่ 1: Duplicate Key — ธุรกรรมซ้ำ (998 + 860 รายการ)</strong>
-    <p style="margin-top:6px;">
-      ระบบพยายาม insert ข้อมูลซ้ำลงตาราง <code>dbo.order_details</code> ทำให้เกิด error
-      <em>"Cannot insert duplicate key row with unique index"</em>
-    </p>
-    <p><strong>ตัวอย่าง Terminal ที่มีปัญหา:</strong></p>
-    <div class="table-wrap"><table>
-      <tr><th>Terminal ID</th><th>ประเภท</th><th>สาเหตุ</th></tr>
-      <tr><td>19902792</td><td>ThaiQRcode</td><td>Notify ซ้ำ → duplicate key</td></tr>
-      <tr><td>19900735</td><td>ThaiQRcode</td><td>Notify ซ้ำ → duplicate key</td></tr>
-      <tr><td>82302092</td><td>ThaiQRcode</td><td>Notify ซ้ำ → duplicate key</td></tr>
-    </table></div>
-    <p style="margin-top:8px;"><strong>💡 แนวทางแก้ไข:</strong> ตรวจสอบ retry logic ว่ามีการส่ง transaction ซ้ำหรือไม่ และเพิ่ม duplicate check ก่อน insert</p>
-  </div>
-
-  <div class="severity-critical">
-    <strong>🔴 ปัญหาที่ 2: Data Truncation — ข้อมูลยาวเกิน Column</strong>
-    <p style="margin-top:6px;">
-      Error <em>"String or binary data would be truncated"</em> เกิดกับ terminal ที่ใช้ Static QR
-    </p>
-    <div class="table-wrap"><table>
-      <tr><th>Terminal ID</th><th>Ref1 Pattern</th><th>สาเหตุ</th></tr>
-      <tr><td>11007749</td><td>STATIC110102967</td><td>ข้อมูล Ref ยาวเกิน column size</td></tr>
-      <tr><td>11007857</td><td>STATIC110102967</td><td>ข้อมูล Ref ยาวเกิน column size</td></tr>
-      <tr><td>11007852</td><td>STATIC110102967</td><td>ข้อมูล Ref ยาวเกิน column size</td></tr>
-    </table></div>
-    <p style="margin-top:8px;"><strong>💡 แนวทางแก้ไข:</strong> ขยาย column size ในตาราง <code>dbo.order_details</code> หรือ trim ข้อมูลก่อน insert</p>
-  </div>
-
-  <div class="severity-critical">
-    <strong>🔴 ปัญหาที่ 3: Schema ไม่ตรง — savefiletransaction_ERROR (10 รายการ)</strong>
-    <p style="margin-top:6px;">
-      Query อ้างอิง column ที่ไม่มีในตาราง:
-      <code>status, mref1, mref2, mref3, mref4, mref5, mref6, mref7, mref8, lastupdate</code>
-    </p>
-    <p style="margin-top:8px;"><strong>💡 แนวทางแก้ไข:</strong> ตรวจสอบ schema ของตารางให้ตรงกับ code หรืออัปเดต code ให้ใช้ชื่อ column ที่ถูกต้อง — นี่คือ bug ที่ต้องแก้ด่วน</p>
-  </div>
-
-  <!-- 5.3 Integration Errors -->
-  <h3>5.3 ปัญหาการเชื่อมต่อกับ Provider ภายนอก</h3>
-
-  <div class="severity-warning">
-    <strong>🟠 TrueMoney Wallet — API Error (55 รายการ)</strong>
-    <ul style="margin-top:6px; padding-left:20px;">
-      <li><strong>400 Bad Request</strong> (38 รายการ) — TrueMoney API ตอบ error กลับมา เกิดช่วง 20:57 น. เป็นหลัก อาจเป็นปัญหาชั่วคราวฝั่ง TrueMoney</li>
-      <li><strong>Payment code expired</strong> (บางส่วนจาก 17 รายการ) — ลูกค้าใช้ payment code ที่หมดอายุแล้ว</li>
-      <li><strong>Insufficient fund</strong> (บางส่วนจาก 17 รายการ) — ยอดเงินในกระเป๋าไม่เพียงพอ</li>
-    </ul>
-    <p><strong>💡 แนวทาง:</strong> กรณี 400 Bad Request ควรตรวจสอบกับ TrueMoney ว่ามี API change หรือไม่ กรณี expired/insufficient เป็นเรื่องปกติฝั่งลูกค้า</p>
-  </div>
-
-  <div class="severity-warning">
-    <strong>🟠 Alipay+ — Notify Error (666 รายการ)</strong>
-    <ul style="margin-top:6px; padding-left:20px;">
-      <li><strong>ERROR_ALIPAYPLUS_NOTIFY_TO_CUSTOMER</strong> (646 รายการ) — แจ้งผลลูกค้าไม่สำเร็จ เกิดทุกนาทีตลอดช่วง 3 ชั่วโมง</li>
-      <li><strong>ALIPAYPLUS_NOTIFY_URL_ERROR02</strong> (20 รายการ) — ไม่พบ paymentrequestid + NullReferenceException</li>
-    </ul>
-    <p><strong>💡 แนวทาง:</strong> ตรวจสอบ endpoint ที่ใช้ notify ลูกค้า Alipay+ ว่ายังทำงานปกติหรือไม่ และแก้ NullReference ใน code</p>
-  </div>
-
-  <div class="severity-warning">
-    <strong>🟠 CIL — Merchant Notify Error (1,255 รายการ)</strong>
-    <ul style="margin-top:6px; padding-left:20px;">
-      <li><strong>ERROR_CIL_NOTIFY_URL</strong> (836 รายการ) — ไม่พบ merchant profile (merchant 200015, 200047 เป็นต้น)</li>
-      <li><strong>ERROR_POST_CIL_NOTIFY_URL</strong> (414 รายการ) — POST callback ไป merchant ล้มเหลว</li>
-      <li><strong>ERROR_CIL_MERCHANT_SCAN_RESPONSE_PAYMENT</strong> (5 รายการ) — NullReferenceException</li>
-    </ul>
-    <p><strong>💡 แนวทาง:</strong> ตรวจสอบ merchant profile ที่หายไป และ URL callback ของ merchant ว่ายังใช้งานได้</p>
-  </div>
-
-  <div class="severity-info">
-    <strong>🔵 ShopeePay — Query Error (9 รายการ)</strong>
-    <p style="margin-top:6px;">ไม่พบ transaction เมื่อ query สถานะ — อาจเป็นเพราะ transaction ยังไม่ถูกสร้างฝั่ง ShopeePay</p>
-  </div>
-
-  <div class="severity-info">
-    <strong>🔵 Token Error (10 รายการ)</strong>
-    <p style="margin-top:6px;">Token ไม่ valid สำหรับ order query — อาจเป็น token หมดอายุ ควรตรวจสอบ token refresh mechanism</p>
-  </div>
-
-  <!-- 5.4 Order Query Efficiency -->
-  <h3>5.4 ประสิทธิภาพ Order Query Polling</h3>
-  <div class="table-wrap"><table>
-    <tr><th>ตัวชี้วัด</th><th>ค่า</th><th>หมายเหตุ</th></tr>
-    <tr><td>จำนวน Query ทั้งหมด</td><td><strong>36,365</strong></td><td>ระบบ poll ถามสถานะจาก TTB</td></tr>
-    <tr><td>พบรายการสำเร็จ</td><td><strong>162</strong> (1.6%)</td><td>ลูกค้าจ่ายแล้ว</td></tr>
-    <tr><td>ไม่พบรายการ (REC NOT FND)</td><td><strong>9,856</strong> (98.4%)</td><td>ยังไม่จ่าย / รอชำระ</td></tr>
-  </table></div>
-  <p style="margin-top:8px;">
-    <strong>💡 ข้อสังเกต:</strong> อัตราการ poll ที่ไม่พบรายการสูงถึง 98.4% แสดงว่าระบบ poll ถี่มาก
-    ในขณะที่ส่วนใหญ่ลูกค้ายังไม่ได้จ่าย ควรพิจารณาปรับ polling interval ให้ห่างขึ้น
-    เพื่อลดภาระ API call ไปยัง TTB
-  </p>
-</div>
-
-<!-- ==================== SECTION 6: RECOMMENDATIONS ==================== -->
-<div class="section">
-  <h2>6. ข้อเสนอแนะและแนวทางแก้ไข</h2>
-
-  <div class="table-wrap"><table>
-    <tr><th style="width:40px">#</th><th>ปัญหา</th><th>ระดับ</th><th>แนวทางแก้ไข</th></tr>
-    <tr>
-      <td>1</td>
-      <td>Duplicate Key ใน order_details</td>
-      <td><span class="badge badge-err">ด่วน</span></td>
-      <td>เพิ่ม duplicate check (IF NOT EXISTS) ก่อน INSERT หรือใช้ MERGE statement และตรวจสอบ retry logic ที่ทำให้ส่ง transaction ซ้ำ</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>Data Truncation (String too long)</td>
-      <td><span class="badge badge-err">ด่วน</span></td>
-      <td>ขยาย column size ในตาราง order_details โดยเฉพาะ field ที่เก็บ Ref1, Ref2 หรือ trim ข้อมูลก่อน insert</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>Schema ไม่ตรง (savefiletransaction)</td>
-      <td><span class="badge badge-err">ด่วน</span></td>
-      <td>แก้ไข code ให้ใช้ชื่อ column ที่ถูกต้อง (status, mref1-8, lastupdate ไม่มีในตาราง) หรือเพิ่ม column ที่ขาด</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>CIL Merchant Profile ไม่พบ</td>
-      <td><span class="badge badge-warn">สำคัญ</span></td>
-      <td>ตรวจสอบ merchant profile ที่หายไป (200015, 200047) และ URL callback ของ merchant</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>Alipay+ Notify ลูกค้าล้มเหลว</td>
-      <td><span class="badge badge-warn">สำคัญ</span></td>
-      <td>ตรวจสอบ endpoint notify ลูกค้า Alipay+ และแก้ NullReferenceException ใน code</td>
-    </tr>
-    <tr>
-      <td>6</td>
-      <td>TrueMoney 400 Bad Request</td>
-      <td><span class="badge badge-warn">สำคัญ</span></td>
-      <td>ประสานงานกับ TrueMoney ตรวจสอบ API specification ว่ามีการเปลี่ยนแปลงหรือไม่</td>
-    </tr>
-    <tr>
-      <td>7</td>
-      <td>Order Query Polling ถี่เกินไป</td>
-      <td><span class="badge badge-info">ปรับปรุง</span></td>
-      <td>ปรับ polling interval ให้ห่างขึ้น (เช่น exponential backoff) เพื่อลดภาระ API 36,365 queries → ลดได้มาก</td>
-    </tr>
-    <tr>
-      <td>8</td>
-      <td>Token Error</td>
-      <td><span class="badge badge-info">ปรับปรุง</span></td>
-      <td>ตรวจสอบ token refresh mechanism ให้ต่ออายุ token อัตโนมัติก่อนหมดอายุ</td>
-    </tr>
-  </table></div>
-</div>
-
-<!-- ==================== SECTION 7: CONCLUSION ==================== -->
-<div class="section">
-  <h2>7. สรุปผลการวิเคราะห์</h2>
-
-  <div class="two-col">
-    <div>
-      <h3 style="color:#2e7d32;">✅ จุดแข็ง</h3>
-      <ul style="padding-left:20px;">
-        <li>ความเร็วประมวลผลดีมาก — 98.2% จบใน sub-second</li>
-        <li>ไม่มี transaction ใดใช้เวลาเกิน 1 วินาที</li>
-        <li>TTB API ตอบกลับเร็ว — เฉลี่ย 0.48 วินาที</li>
-        <li>ระบบรองรับ peak 6 tx/sec ได้โดยไม่มีปัญหา</li>
-        <li>รองรับหลาย payment provider พร้อมกัน</li>
-        <li>มีระบบ LINE notify แจ้งลูกค้าอัตโนมัติ</li>
-      </ul>
-    </div>
-    <div>
-      <h3 style="color:#c62828;">⚠️ จุดที่ต้องปรับปรุง</h3>
-      <ul style="padding-left:20px;">
-        <li>DB Error 1,858 รายการ (duplicate + truncation)</li>
-        <li>Schema ไม่ตรงใน savefiletransaction</li>
-        <li>CIL notify ล้มเหลว 1,255 รายการ</li>
-        <li>Alipay+ notify ลูกค้าล้มเหลว 646 รายการ</li>
-        <li>Order Query poll ถี่เกินไป (98.4% ไม่พบ)</li>
-        <li>TrueMoney API error ช่วง 20:57 น.</li>
-      </ul>
-    </div>
-  </div>
-
-  <div style="margin-top:20px; padding:16px; background:#e8f5e9; border-radius:8px;">
-    <strong>📌 สรุปภาพรวม:</strong>
-    ระบบ Payment Gateway ทำงานได้ดีในภาพรวม ความเร็วประมวลผลอยู่ในเกณฑ์ดีมาก
-    ปัญหาหลักที่ต้องแก้ไขเร่งด่วนคือ Database errors (duplicate key, data truncation, schema mismatch)
-    ซึ่งกระทบต่อการบันทึกธุรกรรมประมาณ 1,868 รายการจากทั้งหมด 7,200 รายการ (25.9%)
-    นอกจากนี้ควรปรับปรุง notification ไปยัง merchant และลูกค้าที่ยังล้มเหลวอยู่
-  </div>
+<div class="empty-state" id="emptyState" style="display:none;">
+  <div class="icon">🔍</div>
+  <p>ไม่พบรายงานที่ตรงกับคำค้นหา</p>
 </div>
 
 <div class="footer">
-  รายงานนี้จัดทำโดยระบบวิเคราะห์ Log อัตโนมัติ | ข้อมูลจาก Log วันที่ 12 เมษายน 2569 เวลา 20:00 - 23:00 น.
+  Payment Gateway Log Analysis System &nbsp;|&nbsp; เพิ่มรายงานใหม่โดย copy block ใน HTML
 </div>
 
 </div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement,i=document.getElementById('themeIcon'),l=document.getElementById('themeLabel');
+  if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');i.textContent='🌙';l.textContent='Dark';localStorage.setItem('theme','light');}
+  else{h.setAttribute('data-theme','dark');i.textContent='☀️';l.textContent='Light';localStorage.setItem('theme','dark');}
+}
+(function(){const s=localStorage.getItem('theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('themeIcon').textContent='☀️';document.getElementById('themeLabel').textContent='Light';}})();
+
+function filterReports(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const cards=document.querySelectorAll('.report-card');
+  let visible=0;
+  cards.forEach(c=>{
+    const text=(c.getAttribute('data-search')||'')+' '+(c.textContent||'');
+    const show=!q||text.toLowerCase().includes(q);
+    c.style.display=show?'':'none';
+    if(show)visible++;
+  });
+  document.getElementById('emptyState').style.display=visible===0?'':'none';
+}
+</script>
 </body>
 </html>
