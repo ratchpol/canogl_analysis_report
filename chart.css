@@ -1,0 +1,146 @@
+/* ============================================
+   Donut Chart — Reusable CSS
+   ใช้กับ SVG donut chart ทุกหน้า
+   แก้สี/ขนาด/เงาที่นี่ที่เดียว
+   ============================================ */
+
+/* --- Container --- */
+.donut-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin: 16px 0;
+}
+
+/* --- SVG Wrapper (3D effect) --- */
+.donut-svg-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
+}
+.donut-svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+/* --- 3D ring base shadow (dark ellipse under the donut) --- */
+.donut-svg-wrap::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 14px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* --- Center label --- */
+.donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-center .donut-num {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+.donut-center .donut-sub {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* --- SVG circles --- */
+.donut-bg {
+  fill: none;
+  stroke: var(--border2);
+  stroke-width: 3.8;
+}
+
+/* Segment A (primary / large) — น้ำเงิน */
+.donut-seg-a {
+  fill: none;
+  stroke: url(#gradA);
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.2));
+  transition: stroke-dasharray .8s ease;
+}
+
+/* Segment B (secondary / small) — แดง */
+.donut-seg-b {
+  fill: none;
+  stroke: url(#gradB);
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15));
+  transition: stroke-dasharray .8s ease;
+}
+
+/* --- Alternate color sets (add class to svg) --- */
+/* Set: green + orange */
+.donut-green .donut-seg-a { stroke: url(#gradGreen); }
+.donut-green .donut-seg-b { stroke: url(#gradOrange); }
+
+/* --- Legend --- */
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.donut-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.dot-blue { background: linear-gradient(135deg, #1565c0, #42a5f5); }
+.dot-red { background: linear-gradient(135deg, #c62828, #ef5350); }
+.dot-green { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+.dot-orange { background: linear-gradient(135deg, #e65100, #ffa726); }
+.dot-purple { background: linear-gradient(135deg, #6a1b9a, #ce93d8); }
+.donut-legend-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.donut-legend-desc {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+  .donut-chart { gap: 16px; }
+  .donut-svg-wrap { width: 140px; height: 140px; }
+  .donut-center .donut-num { font-size: 20px; }
+  .donut-center .donut-sub { font-size: 10px; }
+  .donut-legend-title { font-size: 13px; }
+  .donut-legend-desc { font-size: 11px; }
+}
+
+/* --- Dark mode adjustments --- */
+[data-theme="dark"] .donut-svg-wrap {
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
+}
+[data-theme="dark"] .donut-svg-wrap::before {
+  background: radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%);
+}
+[data-theme="dark"] .donut-legend-dot {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}

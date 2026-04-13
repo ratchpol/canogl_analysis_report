@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thai QR Deep Analysis - 12 เม.ย. 2569</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="chart.css">
+</head>
+<body>
+<div class="bg-anim"><canvas id="bgCanvas"></canvas></div>
+<div class="container">
+
+<!-- SVG Gradient Definitions (ใช้ร่วมกันทุก chart) -->
+<svg style="position:absolute;width:0;height:0;">
+  <defs>
+    <linearGradient id="gradA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1565c0"/>
+      <stop offset="100%" stop-color="#42a5f5"/>
+    </linearGradient>
+    <linearGradient id="gradB" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c62828"/>
+      <stop offset="100%" stop-color="#ef5350"/>
+    </linearGradient>
+    <linearGradient id="gradGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2e7d32"/>
+      <stop offset="100%" stop-color="#66bb6a"/>
+    </linearGradient>
+    <linearGradient id="gradOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e65100"/>
+      <stop offset="100%" stop-color="#ffa726"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="header">
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">☀️</span>
+    <span id="themeLabel">Light</span>
+  </button>
+  <a href="index.html" class="back-btn back-home-btn" style="position:relative;top:auto;right:auto;margin-bottom:12px;padding:8px 20px;font-size:13px;"><span class="btn-icon">←</span> กลับหน้าหลัก</a>
+  <h1>🔍 Thai QR (TTB) — วิเคราะห์เชิงลึก</h1>
+  <p>วันที่: 12 เมษายน 2569 &nbsp;|&nbsp; ช่วงเวลา: 20:00 - 23:00 น. &nbsp;|&nbsp; ข้อมูลจาก Bank Notify + Order Query</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="summary-cards">
+  <div class="card blue">
+    <div class="label">Notify ทั้งหมด</div>
+    <div class="value">7,200</div>
+    <div class="sub">THAIQRCODE_TTB_NOTIFY</div>
+  </div>
+  <div class="card purple">
+    <div class="label">STATIC QR</div>
+    <div class="value">336</div>
+    <div class="sub">4.7% ของทั้งหมด</div>
+  </div>
+  <div class="card green">
+    <div class="label">SUCCESS (Query)</div>
+    <div class="value">6,648</div>
+    <div class="sub">RETURN_ALL_ORDERQUERY</div>
+  </div>
+  <div class="card orange">
+    <div class="label">Match Rate</div>
+    <div class="value">97.5%</div>
+    <div class="sub">SUCCESS ↔ BankRef</div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 1 ==================== -->
+<div class="section">
+  <h2>📋 1. วิเคราะห์ Ref1 — STATIC QR vs Dynamic QR</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+    วิเคราะห์จากไฟล์ <span class="code">THAIQRCODE_TTB_NOTIFY_URL</span> — ธนาคาร TTB ส่ง Notify เข้ามาทั้งหมด 7,200 รายการ<br>
+    แยกตาม Ref1 ว่าเป็น STATIC QR (QR คงที่ประจำร้าน) หรือ Dynamic QR (สร้างใหม่ทุกครั้ง)
+  </p>
+
+  <div style="margin-bottom:6px;">
+      <div class="table-wrap">
+      <table>
+        <tr><th>ประเภท Ref1</th><th style="text-align:right">จำนวน</th><th style="text-align:right">สัดส่วน</th></tr>
+        <tr>
+          <td><span class="badge badge-info">Dynamic</span> QR สร้างใหม่</td>
+          <td style="text-align:right"><strong>6,864</strong></td>
+          <td style="text-align:right">95.3%</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">STATIC*</span> QR คงที่</td>
+          <td style="text-align:right"><strong>336</strong></td>
+          <td style="text-align:right">4.7%</td>
+        </tr>
+        <tr style="background:var(--primary-light);font-weight:700;">
+          <td>รวมทั้งหมด</td>
+          <td style="text-align:right"><strong>7,200</strong></td>
+          <td style="text-align:right">100%</td>
+        </tr>
+      </table>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:6px;">Unique BankRef: 7,196 (มี 4 รายการ BankRef ซ้ำ)</p>
+  </div>
+
+  <h3>สัดส่วน Dynamic vs STATIC</h3>
+  <div class="donut-chart">
+    <div class="donut-svg-wrap">
+      <svg viewBox="0 0 36 36">
+        <circle class="donut-bg" cx="18" cy="18" r="15.9"/>
+        <circle class="donut-seg-a" cx="18" cy="18" r="15.9"
+                stroke-dasharray="95.3 4.7" stroke-dashoffset="0"/>
+        <circle class="donut-seg-b" cx="18" cy="18" r="15.9"
+                stroke-dasharray="4.7 95.3" stroke-dashoffset="-95.3"/>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-num">7,200</div>
+        <div class="donut-sub">รายการ</div>
+      </div>
+    </div>
+    <div class="donut-legend">
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-blue"></div>
+        <div>
+          <div class="donut-legend-title">Dynamic QR — 6,864</div>
+          <div class="donut-legend-desc">95.3% — QR สร้างใหม่ทุกครั้ง</div>
+        </div>
+      </div>
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-red"></div>
+        <div>
+          <div class="donut-legend-title">STATIC QR — 336</div>
+          <div class="donut-legend-desc">4.7% — QR คงที่ประจำร้าน</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight insight-blue">
+    <strong>💡 อธิบาย:</strong>
+    <strong>STATIC QR</strong> คือ QR Code ที่ติดประจำหน้าร้าน ลูกค้าสแกนแล้วกรอกจำนวนเงินเอง (Ref1 ขึ้นต้นด้วย "STATIC")
+    ส่วน <strong>Dynamic QR</strong> คือ QR ที่ระบบสร้างใหม่ทุกครั้ง มียอดเงินฝังไว้แล้ว
+  </div>
+</div>
+
+<!-- ==================== SECTION 2 ==================== -->
+<div class="section">
+  <h2>✅ 2. วิเคราะห์ Order Query — ผลลัพธ์ SUCCESS</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+    วิเคราะห์จากไฟล์ <span class="code">RETURN_ALL_ORDERQUERY_THAIQR</span> — ผลลัพธ์ที่มี trade_state = "SUCCESS"
+  </p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>ตัวชี้วัด</th><th style="text-align:right">จำนวน</th><th>หมายเหตุ</th></tr>
+    <tr>
+      <td>trade_state = SUCCESS (ทั้งหมด)</td>
+      <td style="text-align:right"><strong>6,648</strong></td>
+      <td>Unique transaction_id</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;↳ มี TMB prefix</td>
+      <td style="text-align:right"><strong>6,486</strong></td>
+      <td><span class="badge badge-ok">จาก Bank Notify</span> — ธนาคารแจ้งผลมาแล้ว</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;↳ ไม่มี TMB prefix</td>
+      <td style="text-align:right"><strong>162</strong></td>
+      <td><span class="badge badge-info">จาก Polling</span> — ระบบ poll เจอเอง</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="donut-chart">
+    <div class="donut-svg-wrap">
+      <svg viewBox="0 0 36 36" class="donut-green">
+        <circle class="donut-bg" cx="18" cy="18" r="15.9"/>
+        <circle class="donut-seg-a" cx="18" cy="18" r="15.9"
+                stroke-dasharray="97.6 2.4" stroke-dashoffset="0"/>
+        <circle class="donut-seg-b" cx="18" cy="18" r="15.9"
+                stroke-dasharray="2.4 97.6" stroke-dashoffset="-97.6"/>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-num">6,648</div>
+        <div class="donut-sub">SUCCESS</div>
+      </div>
+    </div>
+    <div class="donut-legend">
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-green"></div>
+        <div>
+          <div class="donut-legend-title">TMB (Bank Notify) — 6,486</div>
+          <div class="donut-legend-desc">97.6% — ธนาคารแจ้งผลมาแล้ว</div>
+        </div>
+      </div>
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-orange"></div>
+        <div>
+          <div class="donut-legend-title">Non-TMB (Polling) — 162</div>
+          <div class="donut-legend-desc">2.4% — ระบบ poll เจอเอง</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight insight-green">
+    <strong>💡 อธิบาย:</strong>
+    transaction_id ที่ขึ้นต้นด้วย "TMB" คือรายการที่ธนาคาร TTB ส่ง Notify เข้ามาแล้ว (Flow B)
+    ส่วนที่ไม่มี TMB คือรายการที่ระบบ poll ถามสถานะแล้วพบว่าสำเร็จ (Flow A) — มีเพียง 162 รายการ
+    แสดงว่า Bank Notify เป็นช่องทางหลักในการรับผลชำระเงิน
+  </div>
+</div>
+
+<!-- ==================== SECTION 3 ==================== -->
+<div class="section">
+  <h2>🔗 3. จับคู่ SUCCESS transaction_id กับ BankRef</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+    เปรียบเทียบ <span class="code">transaction_id</span> จาก Order Query (SUCCESS) กับ <span class="code">BankRef</span> จาก Bank Notify<br>
+    เพื่อตรวจสอบว่ารายการที่ query สำเร็จ ตรงกับรายการที่ธนาคารแจ้งมาหรือไม่
+  </p>
+
+  <div class="insight insight-orange" style="margin-bottom:16px;">
+    <strong>⚠️ หมายเหตุสำคัญ:</strong>
+    <span class="code">transaction_id</span> ใน Order Query มี <strong>#suffix</strong> ต่อท้าย เช่น
+    <span class="code">TMB202604122006248522#146644647091</span><br>
+    ส่วน <span class="code">BankRef</span> ใน Notify ไม่มี # เช่น
+    <span class="code">TMB202604122006248522</span><br>
+    ดังนั้นต้อง <strong>ตัด # ออก</strong> ก่อนจึงจะจับคู่ได้
+  </div>
+
+  <h3>ผลการจับคู่</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>ตัวชี้วัด</th><th style="text-align:right">จำนวน</th><th>สัดส่วน</th><th>หมายเหตุ</th></tr>
+    <tr>
+      <td>SUCCESS ทั้งหมด</td>
+      <td style="text-align:right"><strong>6,648</strong></td>
+      <td>100%</td>
+      <td>จาก Order Query</td>
+    </tr>
+    <tr style="background:var(--green-bg);">
+      <td>✅ จับคู่ได้ (Matched)</td>
+      <td style="text-align:right"><strong>6,482</strong></td>
+      <td><strong>97.5%</strong></td>
+      <td>พบ BankRef ตรงกัน</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;↳ Matched Dynamic QR</td>
+      <td style="text-align:right"><strong>6,482</strong></td>
+      <td>100%</td>
+      <td>ทั้งหมดเป็น Dynamic QR</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;↳ Matched STATIC QR</td>
+      <td style="text-align:right"><strong>0</strong></td>
+      <td>0%</td>
+      <td>STATIC ไม่ผ่าน Order Query flow</td>
+    </tr>
+    <tr style="background:var(--orange-bg);">
+      <td>❌ จับคู่ไม่ได้ (Unmatched)</td>
+      <td style="text-align:right"><strong>166</strong></td>
+      <td>2.5%</td>
+      <td>ไม่พบ BankRef ในช่วงเวลานี้</td>
+    </tr>
+  </table>
+  </div>
+
+  <!-- Visual match rate -->
+  <h3>อัตราการจับคู่</h3>
+  <div class="donut-chart">
+    <div class="donut-svg-wrap">
+      <svg viewBox="0 0 36 36" class="donut-green">
+        <circle class="donut-bg" cx="18" cy="18" r="15.9"/>
+        <circle class="donut-seg-a" cx="18" cy="18" r="15.9"
+                stroke-dasharray="97.5 2.5" stroke-dashoffset="0"/>
+        <circle class="donut-seg-b" cx="18" cy="18" r="15.9"
+                stroke-dasharray="2.5 97.5" stroke-dashoffset="-97.5"/>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-num" style="color:var(--green);">97.5%</div>
+        <div class="donut-sub">Match Rate</div>
+      </div>
+    </div>
+    <div class="donut-legend">
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-green"></div>
+        <div>
+          <div class="donut-legend-title">✅ จับคู่ได้ — 6,482</div>
+          <div class="donut-legend-desc">97.5% — พบ BankRef ตรงกัน</div>
+        </div>
+      </div>
+      <div class="donut-legend-item">
+        <div class="donut-legend-dot dot-orange"></div>
+        <div>
+          <div class="donut-legend-title">❌ จับคู่ไม่ได้ — 166</div>
+          <div class="donut-legend-desc">2.5% — ไม่พบในช่วงเวลานี้</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>ตัวอย่างรายการที่จับคู่ได้</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>transaction_id (Order Query)</th><th>BankRef (Notify)</th><th>Ref1</th></tr>
+    <tr><td class="code" style="font-size:11px;">TMB202604122006248522#146644647091</td><td class="code" style="font-size:11px;">TMB202604122006248522</td><td style="font-size:12px;">19902593146644647091</td></tr>
+    <tr><td class="code" style="font-size:11px;">TMB202604122016461021#146655141651</td><td class="code" style="font-size:11px;">TMB202604122016461021</td><td style="font-size:12px;">19900737146655141651</td></tr>
+    <tr><td class="code" style="font-size:11px;">TMB202604122242214791#146801694345</td><td class="code" style="font-size:11px;">TMB202604122242214791</td><td style="font-size:12px;">19910838146801694345</td></tr>
+    <tr><td class="code" style="font-size:11px;">TMB202604122003247841#146642980527</td><td class="code" style="font-size:11px;">TMB202604122003247841</td><td style="font-size:12px;">19901249146642980527</td></tr>
+    <tr><td class="code" style="font-size:11px;">TMB202604122037496952#146676532379</td><td class="code" style="font-size:11px;">TMB202604122037496952</td><td style="font-size:12px;">19900739146676532379</td></tr>
+  </table>
+  </div>
+</div>
+
+<!-- ==================== SECTION 4: INSIGHTS ==================== -->
+<div class="section">
+  <h2>📊 4. สรุปและข้อสังเกต</h2>
+
+  <div class="insight insight-green">
+    <strong>✅ จุดแข็ง:</strong>
+    <ul style="margin-top:6px;padding-left:18px;font-size:13px;">
+      <li>อัตราจับคู่ SUCCESS กับ BankRef สูงถึง <strong>97.5%</strong> — ระบบทำงานสอดคล้องกันดี</li>
+      <li>Bank Notify เป็นช่องทางหลัก (97.6%) ในการรับผลชำระเงิน — เชื่อถือได้</li>
+      <li>Dynamic QR คิดเป็น 95.3% ของ traffic — ระบบสร้าง QR ใหม่ทุกครั้งเป็นหลัก</li>
+    </ul>
+  </div>
+
+  <div class="insight insight-orange">
+    <strong>⚠️ ข้อสังเกต:</strong>
+    <ul style="margin-top:6px;padding-left:18px;font-size:13px;">
+      <li><strong>166 รายการ SUCCESS ไม่พบ BankRef</strong> — น่าจะเป็น transaction จากช่วงเวลาก่อน 20:00 น. ที่ query สำเร็จในช่วงนี้</li>
+      <li><strong>STATIC QR ไม่มี match ใน Order Query</strong> — เพราะ STATIC QR ใช้ flow ที่ต่างออกไป (ไม่ผ่าน order query polling)</li>
+      <li><strong>transaction_id มี #suffix</strong> — ต้องระวังเวลาเขียน code จับคู่ ต้องตัด # ออกก่อน</li>
+      <li><strong>STATIC QR 336 รายการ (4.7%)</strong> — เป็นกลุ่มที่เกิด "String or binary data truncation" error ใน DB</li>
+    </ul>
+  </div>
+
+  <div class="insight insight-blue">
+    <strong>💡 ข้อเสนอแนะ:</strong>
+    <ul style="margin-top:6px;padding-left:18px;font-size:13px;">
+      <li>ตรวจสอบ 166 รายการที่ unmatched ว่ามี transaction จากช่วงก่อนหน้าจริงหรือไม่</li>
+      <li>ปรับ DB schema รองรับ STATIC QR Ref format ที่ยาวกว่าปกติ</li>
+      <li>พิจารณาเพิ่ม logging สำหรับ STATIC QR flow แยกต่างหาก</li>
+    </ul>
+  </div>
+</div>
+
+<div class="back-home-wrap">
+  <a href="index.html" class="back-home-btn"><span class="btn-icon">←</span> กลับหน้าหลัก</a>
+</div>
+
+<div class="footer">
+  รายงานนี้จัดทำโดยระบบวิเคราะห์ Log อัตโนมัติ &nbsp;|&nbsp; ข้อมูลจาก Log วันที่ 12 เมษายน 2569
+</div>
+
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement,i=document.getElementById('themeIcon'),l=document.getElementById('themeLabel');
+  if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');i.textContent='🌙';l.textContent='Dark';localStorage.setItem('theme','light');}
+  else{h.setAttribute('data-theme','dark');i.textContent='☀️';l.textContent='Light';localStorage.setItem('theme','dark');}
+}
+(function(){const s=localStorage.getItem('theme');if(s==='light'){document.documentElement.setAttribute('data-theme','light');document.getElementById('themeIcon').textContent='🌙';document.getElementById('themeLabel').textContent='Dark';}})();
+</script>
+<script src="bg-anim.js"></script>
+</body>
+</html>
